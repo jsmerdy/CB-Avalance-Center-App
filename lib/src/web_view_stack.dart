@@ -4,7 +4,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewStack extends StatefulWidget {
   const WebViewStack({required this.controller, Key? key}) : super(key: key);
-
   final Completer<WebViewController> controller;
 
   @override

@@ -70,6 +70,11 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+class ZoneInfo {
+  String link;
+  ZoneInfo({required this.link});
+}
+
 class NorthWestZone extends StatefulWidget {
   const NorthWestZone({Key? key}) : super(key: key);
 
@@ -78,6 +83,7 @@ class NorthWestZone extends StatefulWidget {
 }
 
 class _NorthWestZoneState extends State<NorthWestZone> {
+  final zoneInfo = ZoneInfo(link: 'https://cbavalanchecenter.org/forecasts/#/northwest-mountains');
   final controller = Completer<WebViewController>();
 
   @override
