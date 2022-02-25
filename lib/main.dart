@@ -54,6 +54,16 @@ class HomeScreen extends StatelessWidget {
                 child: const Text('South East Zone'),
               ),
             ),
+            Center(
+              child: ElevatedButton(
+                // Within the `FirstScreen` widget
+                onPressed: () {
+                  // Navigate to the second screen using a named route.
+                  Navigator.pushNamed(context, '/observationPage');
+                },
+                child: const Text('Observation Page'),
+              ),
+            ),
           ],
         )
     );
@@ -104,6 +114,19 @@ class _SouthEastZone extends State<SouthEastZone> {
         ],
       ),
       body: WebViewStack(controller: controller),
+    );
+  }
+}
+
+class ObservationPage extends StatelessWidget {
+  const ObservationPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Observation Page"),
+      ),
     );
   }
 }
