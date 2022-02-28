@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewStack extends StatefulWidget {
-  const WebViewStack({required this.controller, Key? key}) : super(key: key);
+  const WebViewStack({required this.controller, required this.url, Key? key}) : super(key: key);
+  final String url;
   final Completer<WebViewController> controller;
+
 
   @override
   State<WebViewStack> createState() => _WebViewStackState();
@@ -18,7 +20,7 @@ class _WebViewStackState extends State<WebViewStack> {
     return Stack(
       children: [
         WebView(
-          initialUrl: 'https://cbavalanchecenter.org/forecasts/#/northwest-mountains',
+          initialUrl: widget.url,
           javascriptMode: JavascriptMode.unrestricted,
 
           onWebViewCreated: (webViewController) {

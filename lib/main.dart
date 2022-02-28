@@ -95,7 +95,7 @@ class _NorthWestZoneState extends State<NorthWestZone> {
           NavigationControls(controller: controller)
         ],
       ),
-      body: WebViewStack(controller: controller),
+      body: WebViewStack(controller: controller, url: 'https://cbavalanchecenter.org/forecasts/#/northwest-mountains'),
     );
   }
 }
@@ -119,7 +119,7 @@ class _SouthEastZone extends State<SouthEastZone> {
           NavigationControls(controller: controller)
         ],
       ),
-      body: WebViewStack(controller: controller),
+      body: WebViewStack(controller: controller, url: 'https://cbavalanchecenter.org/forecasts/#/southeast-mountains'),
     );
   }
 }
