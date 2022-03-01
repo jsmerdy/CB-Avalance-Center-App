@@ -18,6 +18,7 @@ void main() {
         '/northWestZone': (context) => const NorthWestZone(),
         '/southEastZone': (context) => const SouthEastZone(),
         '/observationPage': (context) => const ObservationPage(),
+        '/userPage': (context) => const UserPage(),
       },
     ),
   );
@@ -64,6 +65,16 @@ class HomeScreen extends StatelessWidget {
                 child: const Text('Observation Page'),
               ),
             ),
+            Center(
+              child: ElevatedButton(
+                // Within the `FirstScreen` widget
+                onPressed: () {
+                  // Navigate to the second screen using a named route.
+                  Navigator.pushNamed(context, '/userPage');
+                },
+                child: const Text('User Page'),
+              ),
+            )
           ],
         )
     );
@@ -132,6 +143,70 @@ class ObservationPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Observation Page"),
+      ),
+    );
+  }
+}
+
+class UserPage extends StatefulWidget {
+  const UserPage({Key? key}) : super(key: key);
+
+  @override
+  _UserPageState createState() => _UserPageState();
+}
+
+class _UserPageState extends State<UserPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("User Page"),
+      ),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Name'
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Email'
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                return null;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Processing Data')),
+                    );
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
