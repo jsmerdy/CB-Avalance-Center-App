@@ -1,20 +1,18 @@
-import 'dart:async';
-import 'package:cbac_app/src/navigation_controls.dart';
-import 'package:cbac_app/src/web_view_stack.dart';
+import 'package:cbac_app/src/zone_pages.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:cbac_app/src/user_database.dart';
+import 'package:cbac_app/src/user_page.dart';
+import 'package:cbac_app/src/observation_page.dart';
 
 void main() {
+  startDatabase();
+
   runApp(
     MaterialApp(
       title: 'Named Routes Demo',
-      // Start the app with the "/" named route. In this case, the app starts
-      // on the FirstScreen widget.
       initialRoute: '/',
       routes: {
-        // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => const HomeScreen(),
-        // When navigating to the "/second" route, build the SecondScreen widget.
         '/northWestZone': (context) => const NorthWestZone(),
         '/southEastZone': (context) => const SouthEastZone(),
         '/observationPage': (context) => const ObservationPage(),
@@ -37,9 +35,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Center(
               child: ElevatedButton(
-                // Within the `FirstScreen` widget
                 onPressed: () {
-                  // Navigate to the second screen using a named route.
                   Navigator.pushNamed(context, '/northWestZone');
                 },
                 child: const Text('North West Zone'),
@@ -47,9 +43,7 @@ class HomeScreen extends StatelessWidget {
             ),
             Center(
               child: ElevatedButton(
-                // Within the `FirstScreen` widget
                 onPressed: () {
-                  // Navigate to the second screen using a named route.
                   Navigator.pushNamed(context, '/southEastZone');
                 },
                 child: const Text('South East Zone'),
@@ -57,9 +51,7 @@ class HomeScreen extends StatelessWidget {
             ),
             Center(
               child: ElevatedButton(
-                // Within the `FirstScreen` widget
                 onPressed: () {
-                  // Navigate to the second screen using a named route.
                   Navigator.pushNamed(context, '/observationPage');
                 },
                 child: const Text('Observation Page'),
@@ -67,9 +59,7 @@ class HomeScreen extends StatelessWidget {
             ),
             Center(
               child: ElevatedButton(
-                // Within the `FirstScreen` widget
                 onPressed: () {
-                  // Navigate to the second screen using a named route.
                   Navigator.pushNamed(context, '/userPage');
                 },
                 child: const Text('User Page'),
@@ -77,137 +67,6 @@ class HomeScreen extends StatelessWidget {
             )
           ],
         )
-    );
-  }
-}
-
-class ZoneInfo {
-  String link;
-  ZoneInfo({required this.link});
-}
-
-class NorthWestZone extends StatefulWidget {
-  const NorthWestZone({Key? key}) : super(key: key);
-
-  @override
-  _NorthWestZoneState createState() => _NorthWestZoneState();
-}
-
-class _NorthWestZoneState extends State<NorthWestZone> {
-  final zoneInfo = ZoneInfo(link: 'https://cbavalanchecenter.org/forecasts/#/northwest-mountains');
-  final controller = Completer<WebViewController>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('North West Zone'),
-        actions: [
-          NavigationControls(controller: controller)
-        ],
-      ),
-      body: WebViewStack(controller: controller, url: 'https://cbavalanchecenter.org/forecasts/#/northwest-mountains'),
-    );
-  }
-}
-
-class SouthEastZone extends StatefulWidget {
-  const SouthEastZone({Key? key}) : super(key: key);
-
-  @override
-  _SouthEastZone createState() => _SouthEastZone();
-}
-
-class _SouthEastZone extends State<SouthEastZone> {
-  final controller = Completer<WebViewController>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('South East Zone'),
-        actions: [
-          NavigationControls(controller: controller)
-        ],
-      ),
-      body: WebViewStack(controller: controller, url: 'https://cbavalanchecenter.org/forecasts/#/southeast-mountains'),
-    );
-  }
-}
-
-class ObservationPage extends StatelessWidget {
-  const ObservationPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Observation Page"),
-      ),
-    );
-  }
-}
-
-class UserPage extends StatefulWidget {
-  const UserPage({Key? key}) : super(key: key);
-
-  @override
-  _UserPageState createState() => _UserPageState();
-}
-
-class _UserPageState extends State<UserPage> {
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Page"),
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Name'
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Email'
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
-                  }
-                },
-                child: const Text('Submit'),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
