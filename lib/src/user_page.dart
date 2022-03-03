@@ -1,4 +1,6 @@
+import 'package:cbac_app/src/user_info.dart';
 import 'package:flutter/material.dart';
+import 'package:cbac_app/src/user_database.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -9,6 +11,8 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   final _formKey = GlobalKey<FormState>();
+  late String name;
+  late String email;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +25,9 @@ class _UserPageState extends State<UserPage> {
         child: Column(
           children: [
             TextFormField(
+              onSaved: (String? value) {
+                name = value!;
+              },
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Name'
@@ -33,6 +40,9 @@ class _UserPageState extends State<UserPage> {
               },
             ),
             TextFormField(
+              onSaved: (String? value) {
+                email = value!;
+              },
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Email'
@@ -47,8 +57,13 @@ class _UserPageState extends State<UserPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    _formKey.currentState?.save();
+                    var user = User(id: 0, name: name, email: email);
+                    startDatabase(user);
+
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Processing Data')),
                     );
@@ -63,3 +78,4 @@ class _UserPageState extends State<UserPage> {
     );
   }
 }
+

@@ -1,12 +1,9 @@
 import 'package:cbac_app/src/zone_pages.dart';
 import 'package:flutter/material.dart';
-import 'package:cbac_app/src/user_database.dart';
 import 'package:cbac_app/src/user_page.dart';
 import 'package:cbac_app/src/observation_page.dart';
 
 void main() {
-  startDatabase();
-
   runApp(
     MaterialApp(
       title: 'Named Routes Demo',
