@@ -67,7 +67,7 @@ Future<void> startDatabase(User addUser) async {
     );
   }
 
-  Future<List<User>> user() async {
+  Future<List<User>> showUser() async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.query('user');
@@ -82,4 +82,5 @@ Future<void> startDatabase(User addUser) async {
   }
 
   await updateUser(addUser);
+  print(await showUser());
 }
