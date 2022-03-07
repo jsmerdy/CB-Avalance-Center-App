@@ -103,6 +103,30 @@ class _ObservationPageState extends State<ObservationPage> {
                 return null;
               },
             ),
+            TextFormField(
+              decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Snowpack'
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Weather'
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                return null;
+              },
+            ),
             const Text("Add me to the CBAC mailing list"),
             Checkbox(value: isChecked,
                 onChanged: (bool? value) {
