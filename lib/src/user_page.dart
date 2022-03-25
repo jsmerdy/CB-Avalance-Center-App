@@ -1,4 +1,3 @@
-import 'package:cbac_app/src/user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:cbac_app/src/user_database.dart';
 
@@ -10,9 +9,42 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  late String _initialName, _initialEmail;
+  late String _name, _email;
+  late List<Map<String, dynamic>> _users = [];
+  bool _isLoading = true;
+
+  void _refreshUsers() async {
+    final data = await SQLHelper.getItems();
+    setState(() {
+      _users = data;
+      _isLoading = false;
+      if(_users.isEmpty) {
+        _initialName = "enter name";
+        _initialEmail = "enter email";
+      } else {
+        _initialName = _users[0]['name'];
+        _initialEmail = _users[0]['email'];
+      }
+    });
+  }
+
   final _formKey = GlobalKey<FormState>();
-  late String name;
-  late String email;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshUsers();
+  }
+
+  Future<void> _addItem(name, email) async {
+    await SQLHelper.createItem(name, email);
+  }
+
+  Future<void> _updateItem(name, email) async {
+    await SQLHelper.updateItem(
+        1, name, email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +52,17 @@ class _UserPageState extends State<UserPage> {
       appBar: AppBar(
         title: const Text("User Page"),
       ),
-      body: Form(
+      body: _isLoading ? const Center(
+        child: CircularProgressIndicator(),
+      )
+      : Form(
         key: _formKey,
         child: Column(
           children: [
             TextFormField(
+              initialValue: _initialName,
               onSaved: (String? value) {
-                name = value!;
+                _name = value!;
               },
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -40,8 +76,9 @@ class _UserPageState extends State<UserPage> {
               },
             ),
             TextFormField(
+              initialValue: _initialEmail,
               onSaved: (String? value) {
-                email = value!;
+                _email = value!;
               },
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -60,13 +97,17 @@ class _UserPageState extends State<UserPage> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState?.save();
-                    var user = User(id: 0, name: name, email: email);
-                    startDatabase(user);
-
-
+                    if(_users.isEmpty) {
+                      _addItem(_name, _email);
+                    }
+                    else {
+                      _updateItem(_name, _email);
+                    }
+                    _refreshUsers();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Processing Data')),
                     );
+                    Navigator.pop(context);
                   }
                 },
                 child: const Text('Submit'),
