@@ -1,3 +1,4 @@
+import 'package:cbac_app/src/user_database.dart';
 import 'package:flutter/material.dart';
 
 class ObservationPage extends StatefulWidget {
@@ -12,6 +13,23 @@ class _ObservationPageState extends State<ObservationPage> {
   DateTime selectedDate = DateTime.now();
   bool isChecked = false;
 
+  late String _initialName, _initialEmail;
+  late List<Map<String, dynamic>> _users = [];
+
+  void _refreshUsers() async {
+    final data = await SQLHelper.getItems();
+    setState(() {
+      _users = data;
+      if(_users.isEmpty) {
+        _initialName = "enter name";
+        _initialEmail = "enter email";
+      } else {
+        _initialName = _users[0]['name'];
+        _initialEmail = _users[0]['email'];
+      }
+    });
+  }
+
   Future<void> _selectedDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
@@ -23,6 +41,12 @@ class _ObservationPageState extends State<ObservationPage> {
         selectedDate = picked;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshUsers();
   }
 
   @override
@@ -42,7 +66,7 @@ class _ObservationPageState extends State<ObservationPage> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
+                  return 'Please enter a subject';
                 }
                 return null;
               },
@@ -51,6 +75,7 @@ class _ObservationPageState extends State<ObservationPage> {
             ElevatedButton(onPressed: () => _selectedDate(context), child: const Text('Change Date'),
             ),
             TextFormField(
+              initialValue: _initialEmail,
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Email'
@@ -63,13 +88,14 @@ class _ObservationPageState extends State<ObservationPage> {
               },
             ),
             TextFormField(
+              initialValue: _initialName,
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Name'
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
+                  return 'Please enter your Name';
                 }
                 return null;
               },
@@ -109,7 +135,7 @@ class _ObservationPageState extends State<ObservationPage> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
+                  return 'Please enter snowpack description';
                 }
                 return null;
               },
@@ -121,7 +147,7 @@ class _ObservationPageState extends State<ObservationPage> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
+                  return 'Please enter weather';
                 }
                 return null;
               },
