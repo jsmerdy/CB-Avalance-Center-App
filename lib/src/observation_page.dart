@@ -1,4 +1,6 @@
-import 'package:cbac_app/src/user_database.dart';
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -137,6 +139,8 @@ class _ObservationPageState extends State<ObservationPage> {
     });
   }
 
+
+
   Future<void> _selectedDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
@@ -148,12 +152,6 @@ class _ObservationPageState extends State<ObservationPage> {
         selectedDate = picked;
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshUsers();
   }
 
   @override
