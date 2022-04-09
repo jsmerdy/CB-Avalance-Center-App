@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cbac_app/src/user_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +160,7 @@ class _ObservationPageState extends State<ObservationPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("Observation Page"),
+        backgroundColor: Colors.black,
       ),
       body: Form(
         child: SingleChildScrollView(

@@ -48,75 +48,83 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Page"),
-      ),
-      body: _isLoading ? const Center(
-        child: CircularProgressIndicator(),
-      )
-      : Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              initialValue: _initialName,
-              onSaved: (String? value) {
-                _name = value!;
-              },
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Name'
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              initialValue: _initialEmail,
-              onSaved: (String? value) {
-                _email = value!;
-              },
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Email'
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState?.save();
-                    if(_users.isEmpty) {
-                      _addItem(_name, _email);
-                    }
-                    else {
-                      _updateItem(_name, _email);
-                    }
-                    _refreshUsers();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('Submit'),
-              ),
-            ),
-          ],
+    return Container(
+    constraints: const BoxConstraints.expand(),
+    decoration: const BoxDecoration(
+    image: DecorationImage(
+    image: AssetImage("images/TestPic.jpg"), fit: BoxFit.cover)),
+      child:
+        Scaffold(
+          backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("User Page"),
+          backgroundColor: Colors.transparent,
         ),
-      ),
-    );
+          body: _isLoading ? const Center(
+            child: CircularProgressIndicator(),
+        )
+        :Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                initialValue: _initialName,
+                onSaved: (String? value) {
+                  _name = value!;
+                },
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Name'
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                initialValue: _initialEmail,
+                onSaved: (String? value) {
+                  _email = value!;
+                },
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Email'
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  return null;
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState?.save();
+                      if(_users.isEmpty) {
+                        _addItem(_name, _email);
+                      }
+                      else {
+                        _updateItem(_name, _email);
+                      }
+                      _refreshUsers();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Processing Data')),
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('Submit'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
   }
 }
 
