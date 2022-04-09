@@ -22,6 +22,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+    	<key>NSLocationWhenInUseUsageDescription</key>
+    	<string>Your location is required for reporting avalanche incidents</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Access to the photo library is required to add any photo evidence to the incident report</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
