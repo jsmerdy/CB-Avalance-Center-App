@@ -24,46 +24,54 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Home Screen'),
-        ),
-        body: Column(
-          children: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/northWestZone');
-                },
-                child: const Text('North West Zone'),
+    return Container(
+    constraints: const BoxConstraints.expand(),
+    decoration: const BoxDecoration(
+    image: DecorationImage(
+    image: AssetImage("images/TestPic.jpg"), fit: BoxFit.cover)),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Home Screen'),
+            backgroundColor: Colors.transparent,
+          ),
+          body: Column(
+            children: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/northWestZone');
+                  },
+                  child: const Text('North West Zone'),
+                ),
               ),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/southEastZone');
-                },
-                child: const Text('South East Zone'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/southEastZone');
+                  },
+                  child: const Text('South East Zone'),
+                ),
               ),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/observationPage');
-                },
-                child: const Text('Observation Page'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/observationPage');
+                  },
+                  child: const Text('Observation Page'),
+                ),
               ),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/userPage');
-                },
-                child: const Text('User Page'),
-              ),
-            )
-          ],
-        )
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/userPage');
+                  },
+                  child: const Text('User Page'),
+                ),
+              )
+            ],
+          )
+      )
     );
   }
 }
