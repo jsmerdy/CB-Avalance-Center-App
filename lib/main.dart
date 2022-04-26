@@ -1,7 +1,9 @@
+import 'package:cbac_app/src/download_zones.dart';
 import 'package:cbac_app/src/zone_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:cbac_app/src/user_page.dart';
 import 'package:cbac_app/src/observation_page.dart';
+import 'package:cbac_app/src/offline_page.dart';
 
 void main() {
   runApp(
@@ -14,6 +16,8 @@ void main() {
         '/southEastZone': (context) => const SouthEastZone(),
         '/observationPage': (context) => const ObservationPage(),
         '/userPage': (context) => const UserPage(),
+        '/testPage': (context) => const TestPage(),
+        '/offlinePage': (context) => const OfflinePage(),
       },
     ),
   );
@@ -68,7 +72,23 @@ class HomeScreen extends StatelessWidget {
                   },
                   child: const Text('User Page'),
                 ),
-              )
+              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/testPage');
+                  },
+                  child: const Text('Download Offline Pages'),
+                ),
+              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/offlinePage');
+                  },
+                  child: const Text('View Offline Page'),
+                ),
+              ),
             ],
           )
       )

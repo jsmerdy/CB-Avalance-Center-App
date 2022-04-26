@@ -46,6 +46,8 @@ dependencies:
   test_api: ^0.4.3
   location: ^4.3.0
   image_picker: ^0.8.2
+  convert: ^3.0.1
+  path_provider: ^2.0.9
 
 
 dev_dependencies:
