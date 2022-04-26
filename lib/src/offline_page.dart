@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'file_controls.dart';
@@ -13,6 +14,8 @@ class _OfflinePageState extends State<OfflinePage> {
   late WebViewController controller;
 
   void loadLocalHtml() async {
+    var html = await FileHelper.readContent('southEast');
+    print(html);
     controller.loadFile(await FileHelper.getPath("southEast"));
   }
 
