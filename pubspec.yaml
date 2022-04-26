@@ -46,6 +46,10 @@ dependencies:
   test_api: ^0.4.3
   location: ^4.3.0
   image_picker: ^0.8.2
+  mapbox_gl:
+    git:
+      url: https://github.com/flutter-mapbox-gl/maps.git
+      ref: e15c6c7871608328ca76ff1817188d95d135fb2e
 
 
 dev_dependencies:
@@ -76,6 +80,8 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - images/
+    - assets/cache.db
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
