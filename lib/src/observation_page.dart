@@ -3,9 +3,9 @@ import 'package:cbac_app/src/user_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:image_picker/image_picker.dart';
+import 'map_box.dart';
 
 enum ImageSourceType { gallery, camera }
 
@@ -91,10 +91,7 @@ class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
 }
 
 class _ObservationPageState extends State<ObservationPage> {
-  late GoogleMapController mapController;
-  List<Marker> myMarker = [];
   final Location _location = Location();
-  final LatLng _center = const LatLng(45.521563, -122.677433);
   final ImagePicker _picker = ImagePicker();
   // Pick an image
 
@@ -107,20 +104,6 @@ class _ObservationPageState extends State<ObservationPage> {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => ImageFromGalleryEx(type)));
   }
-
-  void _onMapCreated(GoogleMapController _cntlr)
-  {
-    mapController = _cntlr;
-    _location.onLocationChanged.listen((l) {
-      mapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(l.latitude!, l.longitude!),zoom: 15),
-        ),
-      );
-    });
-  }
-
-
 
   late String _initialName, _initialEmail;
   late List<Map<String, dynamic>> _users = [];
@@ -154,6 +137,38 @@ class _ObservationPageState extends State<ObservationPage> {
     }
   }
 
+  bool _dragOverMap = false;
+  GlobalKey _pointerKey = new GlobalKey();
+
+  _checkDrag(Offset position, bool up) {
+    if (!up) {
+      // find your widget
+      RenderBox? box = _pointerKey.currentContext?.findRenderObject() as RenderBox?;
+
+      if (box != null) {
+        //get offset
+        Offset boxOffset = box.localToGlobal(Offset.zero);
+
+        // check if your pointerdown event is inside the widget (you could do the same for the width, in this case I just used the height)
+        if (position.dy > boxOffset.dy &&
+            position.dy < boxOffset.dy + box.size.height) {
+          // check x dimension aswell
+          if (position.dx > boxOffset.dx &&
+              position.dx < boxOffset.dx + box.size.width) {
+            setState(() {
+              _dragOverMap = true;
+            });
+          }
+        }
+      }
+    } else {
+      setState(() {
+        _dragOverMap = false;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,163 +177,157 @@ class _ObservationPageState extends State<ObservationPage> {
         title: const Text("Observation Page"),
         backgroundColor: Colors.black,
       ),
-      body: Form(
-        child: SingleChildScrollView(
-          key: _formKey,
-          child: Column(
-            children: [
-                TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Subject'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              Text("${selectedDate.toLocal()}".split(' ')[0]),
-              ElevatedButton(onPressed: () => _selectedDate(context), child: const Text('Change Date'),
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Email'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Name'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              DropdownButtonFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Forecast Zone'
-                ),
-                items: const [
-                  DropdownMenuItem(child: Text('North West Mountains'), value: "North West Mountains"),
-                  DropdownMenuItem(child: Text('South East Mountains'), value: "South East Mountains"),
-                ],
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                  }, onChanged: (String? value) {  },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Route Description'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Snowpack'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Weather'
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              MaterialButton(
-                color: Colors.blue,
-                child: const Text(
-                  "Pick Image from Gallery",
-                  style: TextStyle(
-                      color: Colors.white70, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  _handleImageButtonPress(context, ImageSourceType.gallery);
-                },
-              ),
-              SizedBox(
-                height: 200,
-                child:
-                GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _center,
-                    zoom: 11.0,
+      body: Listener(
+          onPointerUp: (ev) {
+            _checkDrag(ev.position, true);
+          },
+          onPointerDown: (ev) {
+            _checkDrag(ev.position, false);
+          },
+        child: Form(
+          child: SingleChildScrollView(
+            key: _formKey,
+            physics:
+            _dragOverMap ? NeverScrollableScrollPhysics() : ScrollPhysics(),
+            child: Column(
+              children: [
+                  TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Subject'
                   ),
-                  markers: Set.from(myMarker),
-                  onTap: _handleTap,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+                Text("${selectedDate.toLocal()}".split(' ')[0]),
+                ElevatedButton(onPressed: () => _selectedDate(context), child: const Text('Change Date'),
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Email'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Name'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                DropdownButtonFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Forecast Zone'
+                  ),
+                  items: const [
+                    DropdownMenuItem(child: Text('North West Mountains'), value: "North West Mountains"),
+                    DropdownMenuItem(child: Text('South East Mountains'), value: "South East Mountains"),
+                  ],
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                    }, onChanged: (String? value) {  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Route Description'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Snowpack'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Weather'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                MaterialButton(
+                  color: Colors.blue,
+                  child: const Text(
+                    "Pick Image from Gallery",
+                    style: TextStyle(
+                        color: Colors.white70, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    _handleImageButtonPress(context, ImageSourceType.gallery);
+                  },
+                ),
+                SizedBox(
+                  key: _pointerKey, // key for finding the widget
+                  height: 300,
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  child:
+                  const MapWidget(
+                  )
+                ),
+                const Text("Add me to the CBAC mailing list"),
+                Checkbox(value: isChecked,
+                    onChanged: (bool? value) {
+                  setState(() {
+                    isChecked = value!;
+                  });
+                    }),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState?.save();
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Processing Data')),
+                        );
+                      }
+                    },
+                    child: const Text('Submit'),
                 ),
               ),
-              const Text("Add me to the CBAC mailing list"),
-              Checkbox(value: isChecked,
-                  onChanged: (bool? value) {
-                setState(() {
-                  isChecked = value!;
-                });
-                  }),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState?.save();
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Processing Data')),
-                      );
-                    }
-                  },
-                  child: const Text('Submit'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      )
+      ),
     );
-  }
-  _handleTap(LatLng observationPoint) {
-    setState(() {
-      myMarker = [];
-      myMarker.add(
-          Marker(
-            markerId: MarkerId(observationPoint.toString()),
-            position: observationPoint,
-          )
-      );
-    });
   }
 }

@@ -52,7 +52,7 @@ class _UserPageState extends State<UserPage> {
     constraints: const BoxConstraints.expand(),
     decoration: const BoxDecoration(
     image: DecorationImage(
-    image: AssetImage("images/TestPic.jpg"), fit: BoxFit.cover)),
+    image: AssetImage("images/cb background.jpg"), fit: BoxFit.cover)),
       child:
         Scaffold(
           backgroundColor: Colors.transparent,
