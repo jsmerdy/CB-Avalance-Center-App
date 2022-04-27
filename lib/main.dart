@@ -36,8 +36,28 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text('Home Screen'),
-            backgroundColor: Colors.transparent,
+            title: Image.asset("images/cbacSimpleLogo.png", fit: BoxFit.contain, height: 32),
+            backgroundColor: Colors.white,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(icon: Image.asset("images/northWestIcon.webp"), onPressed: () {
+                  Navigator.pushNamed(context, '/northWestZone');
+                },),
+                IconButton(icon: Image.asset("images/southEastIcon.webp"), onPressed: () {
+                  Navigator.pushNamed(context, '/southEastZone');
+                }),
+                IconButton(icon: Image.asset("images/binocularsIcon.jpeg"), onPressed: () {
+                  Navigator.pushNamed(context, '/observationPage');
+                }),
+                IconButton(icon: const Icon(Icons.person), onPressed: () {
+                  Navigator.pushNamed(context, '/userPage');
+                }),
+              ],
+            ),
           ),
           body: Column(
             children: [
