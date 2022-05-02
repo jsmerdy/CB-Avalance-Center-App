@@ -37,8 +37,8 @@ class _MapWidgetState extends State<MapWidget> {
   bool _isMoving = false;
   final bool _compassEnabled = true;
   final MinMaxZoomPreference _minMaxZoomPreference =
-  const MinMaxZoomPreference(12.0, 18.0);
-  final String _styleString = "mapbox://styles/mapbox/streets-v11";
+  const MinMaxZoomPreference(0, 14.0);
+  final String _styleString = "mapbox://styles/mapbox/outdoors-v11";
   final bool _rotateGesturesEnabled = true;
   final bool _scrollGesturesEnabled = true;
   final bool _tiltGesturesEnabled = false;
