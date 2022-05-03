@@ -44,6 +44,7 @@ dependencies:
   image_picker: ^0.8.2
   convert: ^3.0.1
   path_provider: ^2.0.9
+  mailer: ^5.1.0
   mapbox_gl:
     git:
       url: https://github.com/flutter-mapbox-gl/maps.git

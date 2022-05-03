@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cbac_app/src/user_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:location/location.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'file_functions.dart';
 import 'map_box.dart';
 
 enum ImageSourceType { gallery, camera }
@@ -26,6 +29,7 @@ class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
   var _image;
   var imagePicker;
   var type;
+  final List<String> _imagePaths = List<String>.empty();
 
   ImageFromGalleryExState(this.type);
 
@@ -57,6 +61,7 @@ class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
                     source: source, imageQuality: 50, preferredCameraDevice: CameraDevice.front);
                 setState(() {
                   _image = File(image.path);
+                  _imagePaths.add(image.path);
                 });
               },
               child: Container(
@@ -89,14 +94,24 @@ class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
     );
   }
 }
+class Model{
+  String? subject;
+  String? email;
+  String? name;
+  String? forecastZone;
+  String? routeDesc;
+  String? snowpack;
+  String? weather;
+}
 
 class _ObservationPageState extends State<ObservationPage> {
   final Location _location = Location();
-  final ImagePicker _picker = ImagePicker();
+  //final ImagePicker _picker = ImagePicker();
   // Pick an image
 
 
   final _formKey = GlobalKey<FormState>();
+  final Model _model = Model();
   DateTime selectedDate = DateTime.now();
   bool isChecked = false;
 
@@ -169,6 +184,7 @@ class _ObservationPageState extends State<ObservationPage> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,8 +201,8 @@ class _ObservationPageState extends State<ObservationPage> {
             _checkDrag(ev.position, false);
           },
         child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
-            key: _formKey,
             physics:
             _dragOverMap ? NeverScrollableScrollPhysics() : ScrollPhysics(),
             child: Column(
@@ -198,10 +214,13 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return 'Please enter your Subject';
                     }
                     return null;
                   },
+                    onSaved: (value){
+                      _model.subject = value;
+                    },
                 ),
                 Text("${selectedDate.toLocal()}".split(' ')[0]),
                 ElevatedButton(onPressed: () => _selectedDate(context), child: const Text('Change Date'),
@@ -217,6 +236,9 @@ class _ObservationPageState extends State<ObservationPage> {
                     }
                     return null;
                   },
+                  onSaved: (value){
+                    _model.email = value;
+                  },
                 ),
                 TextFormField(
                   decoration: const InputDecoration(
@@ -225,9 +247,12 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your Name';
                     }
                     return null;
+                  },
+                  onSaved: (value){
+                    _model.name = value;
                   },
                 ),
                 DropdownButtonFormField(
@@ -241,10 +266,13 @@ class _ObservationPageState extends State<ObservationPage> {
                   ],
                   validator: (value) {
                     if (value == null) {
-                      return 'Please enter your email';
+                      return 'Please enter a Forecast Zone';
                     }
                     return null;
                     }, onChanged: (String? value) {  },
+                  onSaved: (value){
+                    _model.forecastZone = value as String;
+                  },
                 ),
                 TextFormField(
                   decoration: const InputDecoration(
@@ -253,9 +281,12 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter a Route Description';
                     }
                     return null;
+                  },
+                  onSaved: (value){
+                    _model.routeDesc = value;
                   },
                 ),
                 TextFormField(
@@ -265,9 +296,12 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your snowpack observations';
                     }
                     return null;
+                  },
+                  onSaved: (value){
+                    _model.snowpack = value;
                   },
                 ),
                 TextFormField(
@@ -277,9 +311,12 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your weather observations';
                     }
                     return null;
+                  },
+                  onSaved: (value){
+                    _model.weather = value;
                   },
                 ),
                 MaterialButton(
@@ -312,6 +349,8 @@ class _ObservationPageState extends State<ObservationPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(
                     onPressed: () async {
+                      //gather state
+
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState?.save();
 
@@ -319,6 +358,31 @@ class _ObservationPageState extends State<ObservationPage> {
                           const SnackBar(content: Text('Processing Data')),
                         );
                       }
+
+                      //write state to csv
+                      try{
+                        var ff = FileFunctions();
+                        final csvFile = await ff.formEntriesFile;
+
+                        const String headers = "subject,email,name,forecastZone,routeDesc,snowpack,weather\n";
+                        final String data = _model.subject! + ","
+                            + _model.email! + ","
+                            + _model.name! + ","
+                            + _model.forecastZone! + ","
+                            + _model.routeDesc! + ","
+                            + _model.snowpack! + ","
+                            + _model.weather! + ","
+                            + "\n";
+                        await csvFile.writeAsString(headers + data);
+
+
+                        final sendFile = await ff.formEntriesZip;
+                        await csvFile.rename(sendFile.path);
+                      }
+                      catch(e){
+                        log('error: $e');
+                      }
+                      //zip to file in sending folder
                     },
                     child: const Text('Submit'),
                 ),
