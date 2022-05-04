@@ -28,12 +28,12 @@ class FileFunctions{
 
   Future<File> get formEntriesFile async {
     final path = await formEntriesFolder;
-    return File('$path/form.csv');
+    return File('$path/submit.csv');
   }
 
   Future<File> get formEntriesZip async {
     final path = await formEntriesFolder;
-    return File('$path/submit.csv');
+    return File('$path/submit.zip');
   }
 
 }

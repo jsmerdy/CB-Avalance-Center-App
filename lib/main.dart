@@ -11,53 +11,63 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'src/file_functions.dart';
 
+bool timerRunning = false;
 
-Timer scheduleTimeout([int milliseconds = 60000]) =>
-    Timer.periodic(Duration(milliseconds: milliseconds), handleTimeout);
+Timer scheduleTimeout([int seconds = 60]) =>
+    Timer.periodic(Duration(seconds: seconds), handleTimeout);
 
 Future<void> handleTimeout(Timer t) async {  // callback function
-
-  var ff = FileFunctions();
-  final csvFile = await ff.formEntriesZip;
-
-  if (!csvFile.existsSync()) {
-      return;
+  if (timerRunning) {
+    return;
   }
-
-  final Attachment attachment = FileAttachment(csvFile);
-  final List<Attachment> attachments = List<Attachment>.empty(growable : true);
-  attachments.add(attachment);
-  String username = 'info@upallnitesoftware.com';
-  String password = 'Iu123121';
-
-  final smtpServer = gmail(username, password);
-  // Use the SmtpServer class to configure an SMTP server:
-  // final smtpServer = SmtpServer('smtp.domain.com');
-  // See the named arguments of SmtpServer for further configuration
-  // options.
-
-  // Create our message.
-  final message = Message()
-    ..from = Address(username, 'CbacObservation')
-    ..recipients.add('reconzz0263@gmail.com')
-    ..subject = 'Test Observation Page Submission :: 😀 :: ${DateTime.now()}'
-    ..text = 'See attached'
-    ..attachments = attachments;
-
+  timerRunning = true;
   try {
-    final sendReport = await send(message, smtpServer);
-    print('Message sent: ' + sendReport.toString());
-    csvFile.delete();
-  } on MailerException catch (e) {
-    print('Message not sent.');
-    for (var p in e.problems) {
-      print('Problem: ${p.code}: ${p.msg}');
+    stdout.writeln("handleTimeout");
+    var ff = FileFunctions();
+    final zipFile = await ff.formEntriesZip;
+
+    if (!zipFile.existsSync()) {
+      return;
     }
+
+    final Attachment attachment = FileAttachment(zipFile);
+    final List<Attachment> attachments = List<Attachment>.empty(growable: true);
+    attachments.add(attachment);
+    String username = 'info@upallnitesoftware.com';
+    String password = 'Iu123121';
+
+    final smtpServer = gmail(username, password);
+    // Use the SmtpServer class to configure an SMTP server:
+    // final smtpServer = SmtpServer('smtp.domain.com');
+    // See the named arguments of SmtpServer for further configuration
+    // options.
+
+    // Create our message.
+    final message = Message()
+      ..from = Address(username, 'CbacObservation')
+      ..recipients.add('reconzz0263@gmail.com')
+      ..subject = 'Test Observation Page Submission :: 😀 :: ${DateTime.now()}'
+      ..text = 'See attached'
+      ..attachments = attachments;
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+      zipFile.delete();
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
+  }
+  finally{
+    timerRunning = false;
   }
 }
 
 void main() {
-  scheduleTimeout(5 * 1000); // 5 seconds.
+  scheduleTimeout(5); // 5 seconds.
   runApp(
     MaterialApp(
       title: 'Named Routes Demo',

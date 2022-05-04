@@ -1,14 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:cbac_app/src/image_picker.dart';
 import 'package:cbac_app/src/user_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:archive/archive_io.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'file_functions.dart';
 import 'map_box.dart';
+
+//todo: Add image, mailing list, date, map, Zip File
 
 enum ImageSourceType { gallery, camera }
 
@@ -18,82 +23,7 @@ class ObservationPage extends StatefulWidget {
   @override
   _ObservationPageState createState() => _ObservationPageState();
 }
-class ImageFromGalleryEx extends StatefulWidget {
-  final type;
-  const ImageFromGalleryEx(this.type);
 
-  @override
-  ImageFromGalleryExState createState() => ImageFromGalleryExState(this.type);
-}
-class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
-  var _image;
-  var imagePicker;
-  var type;
-  final List<String> _imagePaths = List<String>.empty();
-
-  ImageFromGalleryExState(this.type);
-
-  @override
-  void initState() {
-    super.initState();
-    imagePicker = ImagePicker();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Text(type == ImageSourceType.camera
-              ? "Image from Camera"
-              : "Image from Gallery")),
-      body: Column(
-        children: <Widget>[
-          const SizedBox(
-            height: 52,
-          ),
-          Center(
-            child: GestureDetector(
-              onTap: () async {
-                var source = type == ImageSourceType.camera
-                    ? ImageSource.camera
-                    : ImageSource.gallery;
-                XFile image = await imagePicker.pickImage(
-                    source: source, imageQuality: 50, preferredCameraDevice: CameraDevice.front);
-                setState(() {
-                  _image = File(image.path);
-                  _imagePaths.add(image.path);
-                });
-              },
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: const BoxDecoration(
-                    color: Colors.white),
-                child: _image != null
-                    ? Image.file(
-                  _image,
-                  width: 200.0,
-                  height: 200.0,
-                  fit: BoxFit.fitHeight,
-                )
-                    : Container(
-                  decoration: const BoxDecoration(
-                      color: Colors.white),
-                  width: 200,
-                  height: 200,
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
 class Model{
   String? subject;
   String? email;
@@ -113,11 +43,13 @@ class _ObservationPageState extends State<ObservationPage> {
   final _formKey = GlobalKey<FormState>();
   final Model _model = Model();
   DateTime selectedDate = DateTime.now();
+  List<String> _imagePaths = List<String>.empty(growable: true);
   bool isChecked = false;
 
-  void _handleImageButtonPress(BuildContext context, var type) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ImageFromGalleryEx(type)));
+  Future<void> _handleImageButtonPress(BuildContext context, var type) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => ImageFromGalleryEx(type))).then((val){
+      _imagePaths.addAll(val);
+    });
   }
 
   late String _initialName, _initialEmail;
@@ -153,7 +85,8 @@ class _ObservationPageState extends State<ObservationPage> {
   }
 
   bool _dragOverMap = false;
-  GlobalKey _pointerKey = new GlobalKey();
+  final GlobalKey _pointerKey = GlobalKey();
+  final GlobalKey _mapBoxKey = GlobalKey<MapWidgetState>();
 
   _checkDrag(Offset position, bool up) {
     if (!up) {
@@ -335,7 +268,8 @@ class _ObservationPageState extends State<ObservationPage> {
                   height: 300,
                   width: MediaQuery.of(context).size.width * 0.85,
                   child:
-                  const MapWidget(
+                    MapWidget(
+                      key: _mapBoxKey
                   )
                 ),
                 const Text("Add me to the CBAC mailing list"),
@@ -358,31 +292,44 @@ class _ObservationPageState extends State<ObservationPage> {
                           const SnackBar(content: Text('Processing Data')),
                         );
                       }
+                      String markers = "";
+                      var mapWidgetState = _mapBoxKey.currentState as MapWidgetState;
+                      for(var symbol in mapWidgetState.mapController.symbols) {
+                        stdout.writeln(symbol.options.geometry);
+                        if (markers.isNotEmpty) {
+                          markers += "; ";
+                        }
+                        markers+='${symbol.options.geometry?.latitude}:${symbol.options.geometry?.longitude}';
+                      }
 
-                      //write state to csv
                       try{
                         var ff = FileFunctions();
+                        //write state to csv
                         final csvFile = await ff.formEntriesFile;
 
-                        const String headers = "subject,email,name,forecastZone,routeDesc,snowpack,weather\n";
-                        final String data = _model.subject! + ","
-                            + _model.email! + ","
-                            + _model.name! + ","
-                            + _model.forecastZone! + ","
-                            + _model.routeDesc! + ","
-                            + _model.snowpack! + ","
-                            + _model.weather! + ","
-                            + "\n";
-                        await csvFile.writeAsString(headers + data);
 
 
+                        const String headers = "subject,date,email,name,forecastZone,routeDesc,snowpack,weather,mailingList,coordinates\n";
+                        List<String> data = [_model.subject!,DateFormat('dd/MM/yyyy').format(selectedDate),_model.email!,_model.name!,_model.forecastZone!,_model.routeDesc!,_model.snowpack!,_model.weather!,(isChecked? "true":"false"),markers];
+
+                        await csvFile.writeAsString(headers + data.join(',')+"\n");
+
+                        //zip to file
                         final sendFile = await ff.formEntriesZip;
-                        await csvFile.rename(sendFile.path);
+
+                        var encoder = ZipFileEncoder();
+                        encoder.open(sendFile.path);
+
+                        encoder.addFile(csvFile);
+                        for(var imagePath in _imagePaths) {
+                          encoder.addFile(File(imagePath),imagePath,0);
+                        }
+                        encoder.close();
+
                       }
                       catch(e){
                         log('error: $e');
                       }
-                      //zip to file in sending folder
                     },
                     child: const Text('Submit'),
                 ),

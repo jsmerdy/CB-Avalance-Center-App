@@ -24,10 +24,10 @@ class MapWidget extends StatefulWidget {
   const MapWidget({Key? key}) : super(key: key);
 
   @override
-  _MapWidgetState createState() => _MapWidgetState();
+  MapWidgetState createState() => MapWidgetState();
 }
 
-class _MapWidgetState extends State<MapWidget> {
+class MapWidgetState extends State<MapWidget> {
   final CameraPosition _kInitialPosition;
   final CameraTargetBounds _cameraTargetBounds;
   static double defaultZoom = 12.0;
@@ -48,7 +48,7 @@ class _MapWidgetState extends State<MapWidget> {
   MyLocationTrackingMode _myLocationTrackingMode = MyLocationTrackingMode.None;
 
 
-  _MapWidgetState._ (
+  MapWidgetState._ (
       this._kInitialPosition, this._position, this._cameraTargetBounds);
 
 
@@ -60,7 +60,7 @@ class _MapWidgetState extends State<MapWidget> {
     );
   }
 
-  factory _MapWidgetState() {
+  factory MapWidgetState() {
     CameraPosition cameraPosition = _getCameraPosition();
 
 
@@ -70,7 +70,7 @@ class _MapWidgetState extends State<MapWidget> {
     );
 
 
-    return _MapWidgetState._(
+    return MapWidgetState._(
         cameraPosition, cameraPosition, CameraTargetBounds(cityBounds));
   }
 
