@@ -9,11 +9,11 @@ import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:archive/archive_io.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 
 import 'file_functions.dart';
 import 'map_box.dart';
 
-//todo: Add image, mailing list, date, map, Zip File
 
 enum ImageSourceType { gallery, camera }
 
@@ -321,8 +321,11 @@ class _ObservationPageState extends State<ObservationPage> {
                         encoder.open(sendFile.path);
 
                         encoder.addFile(csvFile);
+                        int imageNumber = 1;
                         for(var imagePath in _imagePaths) {
-                          encoder.addFile(File(imagePath),imagePath,0);
+                          var f = File(imagePath);
+                          encoder.addFile(f,"image"+imageNumber.toString()+extension(f.path),0);
+                          imageNumber++;
                         }
                         encoder.close();
 
