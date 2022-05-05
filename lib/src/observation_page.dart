@@ -333,6 +333,7 @@ class _ObservationPageState extends State<ObservationPage> {
                       catch(e){
                         log('error: $e');
                       }
+                      _formKey.currentState?.reset();
                     },
                     child: const Text('Submit'),
                 ),
