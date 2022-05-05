@@ -1,15 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cbac_app/src/image_picker.dart';
-import 'package:cbac_app/src/user_database.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
 import 'package:archive/archive_io.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file_functions.dart';
 import 'map_box.dart';
@@ -35,15 +31,10 @@ class Model{
 }
 
 class _ObservationPageState extends State<ObservationPage> {
-  final Location _location = Location();
-  //final ImagePicker _picker = ImagePicker();
-  // Pick an image
-
-
   final _formKey = GlobalKey<FormState>();
   final Model _model = Model();
   DateTime selectedDate = DateTime.now();
-  List<String> _imagePaths = List<String>.empty(growable: true);
+  final List<String> _imagePaths = List<String>.empty(growable: true);
   bool isChecked = false;
 
   Future<void> _handleImageButtonPress(BuildContext context, var type) async {
@@ -52,20 +43,13 @@ class _ObservationPageState extends State<ObservationPage> {
     });
   }
 
-  late String _initialName, _initialEmail;
-  late List<Map<String, dynamic>> _users = [];
+  late String? _initialName, _initialEmail;
 
   void _refreshUsers() async {
-    final data = await SQLHelper.getItems();
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _users = data;
-      if(_users.isEmpty) {
-        _initialName = "enter name";
-        _initialEmail = "enter email";
-      } else {
-        _initialName = _users[0]['name'];
-        _initialEmail = _users[0]['email'];
-      }
+      _initialName = prefs.getString('Username');
+      _initialEmail = prefs.getString('Email');
     });
   }
 
@@ -115,6 +99,12 @@ class _ObservationPageState extends State<ObservationPage> {
       });
     }
   }
+  @override
+  void initState() {
+    super.initState();
+    _refreshUsers();
+
+  }
 
 
 
@@ -124,7 +114,8 @@ class _ObservationPageState extends State<ObservationPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("Observation Page"),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.teal,
       ),
       body: Listener(
           onPointerUp: (ev) {
@@ -137,7 +128,7 @@ class _ObservationPageState extends State<ObservationPage> {
           key: _formKey,
           child: SingleChildScrollView(
             physics:
-            _dragOverMap ? NeverScrollableScrollPhysics() : ScrollPhysics(),
+            _dragOverMap ? const NeverScrollableScrollPhysics() : const ScrollPhysics(),
             child: Column(
               children: [
                   TextFormField(
@@ -161,23 +152,10 @@ class _ObservationPageState extends State<ObservationPage> {
                 TextFormField(
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
-                      labelText: 'Email'
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                  onSaved: (value){
-                    _model.email = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
                       labelText: 'Name'
                   ),
+                  initialValue: _initialName,
+                  textCapitalization: TextCapitalization.words,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your Name';
@@ -188,6 +166,23 @@ class _ObservationPageState extends State<ObservationPage> {
                     _model.name = value;
                   },
                 ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Email'
+                  ),
+                  initialValue: _initialEmail,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                  onSaved: (value){
+                    _model.email = value;
+                  },
+                ),
+
                 DropdownButtonFormField(
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
@@ -334,6 +329,8 @@ class _ObservationPageState extends State<ObservationPage> {
                         log('error: $e');
                       }
                       _formKey.currentState?.reset();
+                      _imagePaths.clear();
+                      mapWidgetState.mapController.clearSymbols();
                     },
                     child: const Text('Submit'),
                 ),

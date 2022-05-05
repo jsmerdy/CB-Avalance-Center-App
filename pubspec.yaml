@@ -47,6 +47,7 @@ dependencies:
   mailer: ^5.1.0
   archive: ^3.3.0
   intl: ^0.17.0
+  shared_preferences: ^2.0.13
   mapbox_gl:
     git:
       url: https://github.com/flutter-mapbox-gl/maps.git

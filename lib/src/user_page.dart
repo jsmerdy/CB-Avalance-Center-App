@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cbac_app/src/user_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -9,41 +9,27 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  late String _initialName, _initialEmail;
+  late String? _initialName, _initialEmail;
   late String _name, _email;
-  late List<Map<String, dynamic>> _users = [];
+
   bool _isLoading = true;
 
   void _refreshUsers() async {
-    final data = await SQLHelper.getItems();
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _users = data;
+      _initialName = prefs.getString('Username');
+      _initialEmail = prefs.getString('Email');
       _isLoading = false;
-      if(_users.isEmpty) {
-        _initialName = "enter name";
-        _initialEmail = "enter email";
-      } else {
-        _initialName = _users[0]['name'];
-        _initialEmail = _users[0]['email'];
-      }
+
     });
   }
-
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _refreshUsers();
-  }
 
-  Future<void> _addItem(name, email) async {
-    await SQLHelper.createItem(name, email);
-  }
-
-  Future<void> _updateItem(name, email) async {
-    await SQLHelper.updateItem(
-        1, name, email);
   }
 
   @override
@@ -58,7 +44,8 @@ class _UserPageState extends State<UserPage> {
           backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("User Page"),
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.teal,
         ),
           body: _isLoading ? const Center(
             child: CircularProgressIndicator(),
@@ -69,6 +56,7 @@ class _UserPageState extends State<UserPage> {
             children: [
               TextFormField(
                 initialValue: _initialName,
+                textCapitalization: TextCapitalization.words,
                 onSaved: (String? value) {
                   _name = value!;
                 },
@@ -105,12 +93,9 @@ class _UserPageState extends State<UserPage> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState?.save();
-                      if(_users.isEmpty) {
-                        _addItem(_name, _email);
-                      }
-                      else {
-                        _updateItem(_name, _email);
-                      }
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('Username', _name);
+                      await prefs.setString('Email', _email);
                       _refreshUsers();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Processing Data')),
