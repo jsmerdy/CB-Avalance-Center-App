@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cbac_app/src/file_controls.dart';
 
+
 Future getNorthWest() async {
   final response = await http
       .get(Uri.parse('http://54.176.36.158/northwest'));
@@ -21,7 +22,6 @@ Future getSouthEast() async {
 
   if (response.statusCode == 200) {
     var body = response.body;
-    print(body);
     await FileHelper.writeContent('southEast', body);
     await FileHelper.readContent('southEast');
   } else {
@@ -49,6 +49,9 @@ class _TestPageState extends State<TestPage> {
             child: ElevatedButton(
               onPressed: () {
                 getNorthWest();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Downloading North West Zone')),
+                );
               },
               child: const Text("download northwest zone"),
             ),
@@ -57,6 +60,9 @@ class _TestPageState extends State<TestPage> {
             child: ElevatedButton(
               onPressed: () {
                 getSouthEast();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Downloading South East Zone')),
+                );
               },
               child: const Text("download southeast zone"),
             ),

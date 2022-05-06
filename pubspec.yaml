@@ -52,6 +52,8 @@ dependencies:
     git:
       url: https://github.com/flutter-mapbox-gl/maps.git
       ref: e15c6c7871608328ca76ff1817188d95d135fb2e
+  connectivity_plus: ^2.3.0
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:

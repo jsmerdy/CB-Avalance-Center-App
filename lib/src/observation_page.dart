@@ -1,15 +1,11 @@
-import 'dart:developer';
 import 'dart:io';
-import 'package:cbac_app/src/image_picker.dart';
+import 'package:cbac_app/src/user_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:archive/archive_io.dart';
-import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'file_functions.dart';
+import 'package:flutter/rendering.dart';
+import 'package:location/location.dart';
+import 'package:image_picker/image_picker.dart';
 import 'map_box.dart';
-
 
 enum ImageSourceType { gallery, camera }
 
@@ -19,37 +15,110 @@ class ObservationPage extends StatefulWidget {
   @override
   _ObservationPageState createState() => _ObservationPageState();
 }
+class ImageFromGalleryEx extends StatefulWidget {
+  final type;
+  const ImageFromGalleryEx(this.type);
 
-class Model{
-  String? subject;
-  String? email;
-  String? name;
-  String? forecastZone;
-  String? routeDesc;
-  String? snowpack;
-  String? weather;
+  @override
+  ImageFromGalleryExState createState() => ImageFromGalleryExState(this.type);
+}
+class ImageFromGalleryExState extends State<ImageFromGalleryEx> {
+  var _image;
+  var imagePicker;
+  var type;
+
+  ImageFromGalleryExState(this.type);
+
+  @override
+  void initState() {
+    super.initState();
+    imagePicker = ImagePicker();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: Text(type == ImageSourceType.camera
+              ? "Image from Camera"
+              : "Image from Gallery")),
+      body: Column(
+        children: <Widget>[
+          const SizedBox(
+            height: 52,
+          ),
+          Center(
+            child: GestureDetector(
+              onTap: () async {
+                var source = type == ImageSourceType.camera
+                    ? ImageSource.camera
+                    : ImageSource.gallery;
+                XFile image = await imagePicker.pickImage(
+                    source: source, imageQuality: 50, preferredCameraDevice: CameraDevice.front);
+                setState(() {
+                  _image = File(image.path);
+                });
+              },
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: const BoxDecoration(
+                    color: Colors.white),
+                child: _image != null
+                    ? Image.file(
+                  _image,
+                  width: 200.0,
+                  height: 200.0,
+                  fit: BoxFit.fitHeight,
+                )
+                    : Container(
+                  decoration: const BoxDecoration(
+                      color: Colors.white),
+                  width: 200,
+                  height: 200,
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
 
 class _ObservationPageState extends State<ObservationPage> {
+  final Location _location = Location();
+  final ImagePicker _picker = ImagePicker();
+  // Pick an image
+
+
   final _formKey = GlobalKey<FormState>();
-  final Model _model = Model();
   DateTime selectedDate = DateTime.now();
-  final List<String> _imagePaths = List<String>.empty(growable: true);
   bool isChecked = false;
 
-  Future<void> _handleImageButtonPress(BuildContext context, var type) async {
-    await Navigator.push(context, MaterialPageRoute(builder: (context) => ImageFromGalleryEx(type))).then((val){
-      _imagePaths.addAll(val);
-    });
+  void _handleImageButtonPress(BuildContext context, var type) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => ImageFromGalleryEx(type)));
   }
 
-  late String? _initialName, _initialEmail;
+  late String _initialName, _initialEmail;
+  late List<Map<String, dynamic>> _users = [];
 
   void _refreshUsers() async {
-    final prefs = await SharedPreferences.getInstance();
+    final data = await SQLHelper.getItems();
     setState(() {
-      _initialName = prefs.getString('Username');
-      _initialEmail = prefs.getString('Email');
+      _users = data;
+      if(_users.isEmpty) {
+        _initialName = "enter name";
+        _initialEmail = "enter email";
+      } else {
+        _initialName = _users[0]['name'];
+        _initialEmail = _users[0]['email'];
+      }
     });
   }
 
@@ -69,8 +138,7 @@ class _ObservationPageState extends State<ObservationPage> {
   }
 
   bool _dragOverMap = false;
-  final GlobalKey _pointerKey = GlobalKey();
-  final GlobalKey _mapBoxKey = GlobalKey<MapWidgetState>();
+  GlobalKey _pointerKey = new GlobalKey();
 
   _checkDrag(Offset position, bool up) {
     if (!up) {
@@ -99,13 +167,6 @@ class _ObservationPageState extends State<ObservationPage> {
       });
     }
   }
-  @override
-  void initState() {
-    super.initState();
-    _refreshUsers();
-
-  }
-
 
 
   @override
@@ -113,9 +174,9 @@ class _ObservationPageState extends State<ObservationPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("Observation Page"),
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text("Observation Page", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.teal,
       ),
       body: Listener(
           onPointerUp: (ev) {
@@ -125,10 +186,10 @@ class _ObservationPageState extends State<ObservationPage> {
             _checkDrag(ev.position, false);
           },
         child: Form(
-          key: _formKey,
           child: SingleChildScrollView(
+            key: _formKey,
             physics:
-            _dragOverMap ? const NeverScrollableScrollPhysics() : const ScrollPhysics(),
+            _dragOverMap ? NeverScrollableScrollPhysics() : ScrollPhysics(),
             child: Column(
               children: [
                   TextFormField(
@@ -138,13 +199,10 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your Subject';
+                      return 'Please enter your name';
                     }
                     return null;
                   },
-                    onSaved: (value){
-                      _model.subject = value;
-                    },
                 ),
                 Text("${selectedDate.toLocal()}".split(' ')[0]),
                 ElevatedButton(onPressed: () => _selectedDate(context), child: const Text('Change Date'),
@@ -152,37 +210,27 @@ class _ObservationPageState extends State<ObservationPage> {
                 TextFormField(
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
-                      labelText: 'Name'
-                  ),
-                  initialValue: _initialName,
-                  textCapitalization: TextCapitalization.words,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your Name';
-                    }
-                    return null;
-                  },
-                  onSaved: (value){
-                    _model.name = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
                       labelText: 'Email'
                   ),
-                  initialValue: _initialEmail,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
                     return null;
                   },
-                  onSaved: (value){
-                    _model.email = value;
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Name'
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
                   },
                 ),
-
                 DropdownButtonFormField(
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
@@ -194,13 +242,10 @@ class _ObservationPageState extends State<ObservationPage> {
                   ],
                   validator: (value) {
                     if (value == null) {
-                      return 'Please enter a Forecast Zone';
+                      return 'Please enter your email';
                     }
                     return null;
                     }, onChanged: (String? value) {  },
-                  onSaved: (value){
-                    _model.forecastZone = value as String;
-                  },
                 ),
                 TextFormField(
                   decoration: const InputDecoration(
@@ -209,12 +254,9 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a Route Description';
+                      return 'Please enter your email';
                     }
                     return null;
-                  },
-                  onSaved: (value){
-                    _model.routeDesc = value;
                   },
                 ),
                 TextFormField(
@@ -224,12 +266,9 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your snowpack observations';
+                      return 'Please enter your email';
                     }
                     return null;
-                  },
-                  onSaved: (value){
-                    _model.snowpack = value;
                   },
                 ),
                 TextFormField(
@@ -239,12 +278,9 @@ class _ObservationPageState extends State<ObservationPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your weather observations';
+                      return 'Please enter your email';
                     }
                     return null;
-                  },
-                  onSaved: (value){
-                    _model.weather = value;
                   },
                 ),
                 MaterialButton(
@@ -263,8 +299,7 @@ class _ObservationPageState extends State<ObservationPage> {
                   height: 300,
                   width: MediaQuery.of(context).size.width * 0.85,
                   child:
-                    MapWidget(
-                      key: _mapBoxKey
+                  const MapWidget(
                   )
                 ),
                 const Text("Add me to the CBAC mailing list"),
@@ -278,8 +313,6 @@ class _ObservationPageState extends State<ObservationPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(
                     onPressed: () async {
-                      //gather state
-
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState?.save();
 
@@ -287,50 +320,6 @@ class _ObservationPageState extends State<ObservationPage> {
                           const SnackBar(content: Text('Processing Data')),
                         );
                       }
-                      String markers = "";
-                      var mapWidgetState = _mapBoxKey.currentState as MapWidgetState;
-                      for(var symbol in mapWidgetState.mapController.symbols) {
-                        stdout.writeln(symbol.options.geometry);
-                        if (markers.isNotEmpty) {
-                          markers += "; ";
-                        }
-                        markers+='${symbol.options.geometry?.latitude}:${symbol.options.geometry?.longitude}';
-                      }
-
-                      try{
-                        var ff = FileFunctions();
-                        //write state to csv
-                        final csvFile = await ff.formEntriesFile;
-
-
-
-                        const String headers = "subject,date,email,name,forecastZone,routeDesc,snowpack,weather,mailingList,coordinates\n";
-                        List<String> data = [_model.subject!,DateFormat('dd/MM/yyyy').format(selectedDate),_model.email!,_model.name!,_model.forecastZone!,_model.routeDesc!,_model.snowpack!,_model.weather!,(isChecked? "true":"false"),markers];
-
-                        await csvFile.writeAsString(headers + data.join(',')+"\n");
-
-                        //zip to file
-                        final sendFile = await ff.formEntriesZip;
-
-                        var encoder = ZipFileEncoder();
-                        encoder.open(sendFile.path);
-
-                        encoder.addFile(csvFile);
-                        int imageNumber = 1;
-                        for(var imagePath in _imagePaths) {
-                          var f = File(imagePath);
-                          encoder.addFile(f,"image"+imageNumber.toString()+extension(f.path),0);
-                          imageNumber++;
-                        }
-                        encoder.close();
-
-                      }
-                      catch(e){
-                        log('error: $e');
-                      }
-                      _formKey.currentState?.reset();
-                      _imagePaths.clear();
-                      mapWidgetState.mapController.clearSymbols();
                     },
                     child: const Text('Submit'),
                 ),
