@@ -8,7 +8,6 @@ import 'package:cbac_app/src/zone_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:cbac_app/src/user_page.dart';
 import 'package:cbac_app/src/observation_page.dart';
-import 'package:cbac_app/src/offline_page.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'src/file_functions.dart';
