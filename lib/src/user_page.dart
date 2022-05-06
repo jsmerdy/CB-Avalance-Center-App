@@ -55,10 +55,11 @@ class _UserPageState extends State<UserPage> {
     image: AssetImage("images/cb background.jpg"), fit: BoxFit.cover)),
       child:
         Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("User Page"),
-          backgroundColor: Colors.transparent,
+          iconTheme: const IconThemeData(color: Colors.black),
+          title: const Text("User Page", style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
         ),
           body: _isLoading ? const Center(
             child: CircularProgressIndicator(),

@@ -174,8 +174,9 @@ class _ObservationPageState extends State<ObservationPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("Observation Page"),
-        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text("Observation Page", style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
       ),
       body: Listener(
           onPointerUp: (ev) {

@@ -24,8 +24,9 @@ class _NorthWestZoneState extends State<NorthWestZone> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text('North West Zone'),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text('North West', style: TextStyle(color: Colors.black)),
         actions: [
           NavigationControls(controller: controller)
         ],
@@ -49,8 +50,9 @@ class _SouthEastZone extends State<SouthEastZone> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('South East Zone'),
-        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text('South East', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
         actions: [
           NavigationControls(controller: controller)
         ],
