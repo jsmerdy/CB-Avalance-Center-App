@@ -139,79 +139,79 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/northWestZone');
                     },
-                    child: const Text('North West Zone'),
+                    child: const Text('Northwest Mountains', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/southEastZone');
                     },
-                    child: const Text('South East Zone'),
+                    child: const Text('Southeast Mountains', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/observationPage');
                     },
-                    child: const Text('Observation Page'),
+                    child: const Text('Observations', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/userPage');
                     },
-                    child: const Text('User Page'),
+                    child: const Text('User Profile', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/testPage');
                     },
-                    child: const Text('Download Offline Pages'),
+                    child: const Text('Download Offline Pages', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/northWestOfflinePage');
                     },
-                    child: const Text('View North West Offline Page'),
+                    child: const Text('View Northwest Offline Page', textAlign: TextAlign.center),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  width: 160,
+                  width: 180,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/southEastOfflinePage');
                     },
-                    child: const Text('View South East Offline Page'),
+                    child: const Text('View Southeast Offline Page', textAlign: TextAlign.center),
                   ),
                 ),
               ],
